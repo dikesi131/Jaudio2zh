@@ -1,0 +1,10 @@
+logs/
+models/
+outputs/
+jaudio2zh.egg-info/
+dist/
+__pycache__/
+*.pyc
+.DS_Store
+.mypy_cache/
+.vscode/

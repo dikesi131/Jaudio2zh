@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jaudio2zh"
+version = "0.1.0"
+description = "Local CLI for Japanese audio transcription and Chinese subtitle translation"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "yifan" }]
+dependencies = [
+  "openai-whisper>=20231117",
+  "tqdm>=4.66.5",
+]
+
+[project.scripts]
+jaudio2zh = "jaudio2zh.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
