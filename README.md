@@ -199,11 +199,21 @@ pip install -e .
 
 jaudio2zh \
   --input /path/to/audio.wav \
-  --output-dir ./outputs \
   --whisper-model medium \
   --sakura-api-base http://127.0.0.1:8080 \
   --sakura-model sakura \
   --formats lrc,srt
+```
+
+批量递归处理目录下全部音频文件：
+
+```bash
+jaudio2zh \
+  --batch-input-dir /path/to/audios \
+  --whisper-model medium \
+  --sakura-api-base http://127.0.0.1:8080 \
+  --sakura-model sakura \
+  --formats lrc
 ```
 
 ### 常用选项
@@ -219,12 +229,17 @@ jaudio2zh \
 | `--language` | 源音频语言 (默认 `ja`) |
 | `--log-dir` | 日志存储目录 (默认 `./logs`) |
 | `--formats` | 输出格式，逗号分隔 (e.g., `lrc,srt,txt`) |
+| `--output-dir` | 可选输出目录；不传时默认输出到输入音频所在目录 |
+| `--batch-input-dir` | 递归处理目录下所有音频/视频文件 |
 
 ---
 
 ## 输出文件
 
-对于每个输入文件，将在 `--output-dir` 目录中创建以下文件：
+对于每个输入文件，将创建以下文件：
+
+- 默认保存在输入文件同目录（例如输入 `/user/audios/audio1.mp3`，输出 `/user/audios/audio1.lrc`）
+- 若指定 `--output-dir`，则输出到指定目录
 
 - `<name>.lrc` : LRC 格式字幕 (含时间轴)
 - `<name>.srt` : SRT 格式字幕 (含时间轴)
