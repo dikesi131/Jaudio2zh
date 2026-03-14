@@ -5,6 +5,7 @@ import json
 import logging
 import time
 from typing import Any
+from urllib import parse
 from urllib import error, request
 
 from tqdm import tqdm
@@ -25,6 +26,7 @@ class SakuraTranslator:
         self.api_key = api_key.strip()
         self.request_timeout = max(10, int(request_timeout))
         self.parallel_requests = max(1, int(parallel_requests))
+        self.disable_proxy = self._should_disable_proxy(self.api_base)
         self.model_id = self._resolve_model_id(model_name_or_path)
         self.logger.info(
             "Using Sakura API translator model=%s base=%s",
@@ -78,7 +80,7 @@ class SakuraTranslator:
             req.add_header("Authorization", f"Bearer {self.api_key}")
 
         try:
-            with request.urlopen(req, timeout=self.request_timeout) as resp:
+            with self._open_url(req) as resp:
                 payload = json.loads(resp.read().decode("utf-8"))
             data = payload.get("data", [])
             if data and isinstance(data, list) and data[0].get("id"):
@@ -127,9 +129,7 @@ class SakuraTranslator:
                 req.add_header("Authorization", f"Bearer {self.api_key}")
 
             try:
-                with request.urlopen(
-                    req, timeout=self.request_timeout
-                ) as resp:
+                with self._open_url(req) as resp:
                     raw = resp.read().decode("utf-8")
                 data: dict[str, Any] = json.loads(raw)
                 choices = data.get("choices", [])
@@ -166,3 +166,13 @@ class SakuraTranslator:
         if self.api_base.endswith("/v1") and path.startswith("/v1/"):
             return self.api_base + path[3:]
         return self.api_base + path
+
+    def _open_url(self, req: request.Request):
+        if self.disable_proxy:
+            opener = request.build_opener(request.ProxyHandler({}))
+            return opener.open(req, timeout=self.request_timeout)
+        return request.urlopen(req, timeout=self.request_timeout)
+
+    def _should_disable_proxy(self, api_base: str) -> bool:
+        host = (parse.urlparse(api_base).hostname or "").lower()
+        return host in {"127.0.0.1", "localhost", "::1"}
